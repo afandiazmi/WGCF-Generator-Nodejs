@@ -4,7 +4,7 @@ const nacl = require("tweetnacl");
 const naclUtil = require("tweetnacl-util");
 
 const app = express();
-const PORT = 3000;
+const PORT = 3311;
 
 // --- MIDDLEWARE ---
 // This allows us to read the data sent from the Pug form
