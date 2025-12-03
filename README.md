@@ -148,7 +148,7 @@ If you want to contribute (feature request, bugfixes, or other), please create a
 
 ## License
 
-ISC (or change to the license you prefer)
+ISC
 
 ---
 
