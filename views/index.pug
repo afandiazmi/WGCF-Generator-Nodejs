@@ -1,0 +1,179 @@
+doctype html
+html(lang="en" class="dark")
+  head
+    title WARP-Gen+
+    meta(name="viewport" content="width=device-width, initial-scale=1")
+    link(
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍊</text></svg>" 
+      rel="icon"
+      )
+    //- Tailwind CSS CDN
+    script(src="https://cdn.tailwindcss.com")
+    //- Configure Tailwind for specific brand colors
+    script.
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                orange: '#f6821f',
+                dark: '#0f172a',
+                card: '#1e293b',
+                input: '#334155'
+              }
+            }
+          }
+        }
+      }
+    style.
+      /* Custom transition for smoother reveals */
+      #advancedSection { transition: all 0.3s ease-in-out; }
+
+  body.bg-brand-dark.text-slate-200.min-h-screen.flex.flex-col.items-center.justify-center.py-10.font-sans
+    div.w-full.max-w-xl.px-4
+      //- MAIN CARD
+      div.bg-brand-card.rounded-2xl.shadow-2xl.border.border-slate-700.p-8
+        
+        //- HEADER
+        div.text-center.mb-8
+          h2.text-3xl.font-extrabold.text-brand-orange.mb-2 WARP Generator
+          p.text-slate-400.text-sm Custom WireGuard Configuration
+
+        hr.border-slate-700.mb-8
+
+        //- FORM
+        form(method="POST" action="/download")
+          
+          //- 1. MODE SELECTION (Tailwind Segmented Control)
+          div.mb-8
+            label.block.text-sm.font-bold.text-slate-300.mb-3.text-center Configuration Mode
+            
+            div.flex.justify-center
+              div.bg-slate-900.p-1.rounded-lg.inline-flex
+                //- Auto Option
+                div
+                  input.peer.sr-only(type="radio" name="mode" id="modeAuto" value="auto" checked onchange="toggleMode()")
+                  label.flex.items-center.justify-center.px-6.py-2.rounded-md.cursor-pointer.text-sm.font-medium.transition-all.duration-200.text-slate-400(for="modeAuto" class="peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-md hover:text-white") Auto (Default)
+                
+                //- Manual Option
+                div.ml-1
+                  input.peer.sr-only(type="radio" name="mode" id="modeManual" value="manual" onchange="toggleMode()")
+                  label.flex.items-center.justify-center.px-6.py-2.rounded-md.cursor-pointer.text-sm.font-medium.transition-all.duration-200.text-slate-400(for="modeManual" class="peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-md hover:text-white") Manual (Custom)
+
+          //- 2. ADVANCED FIELDS
+          div#advancedSection(style="display: none;")
+            div.bg-blue-900.bg-opacity-20.border.border-blue-800.rounded-lg.p-4.mb-6
+              p.text-blue-200.text-xs.flex.items-center
+                svg.w-4.h-4.mr-2(fill="none" stroke="currentColor" viewBox="0 0 24 24")
+                  path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z")
+                | Manual Mode: Defaults are pre-filled. Edit carefully.
+
+            //- Endpoint
+            div.mb-5
+              label.block.text-sm.font-medium.text-slate-300.mb-2 Endpoint
+              input#endpointInput.advanced-input.w-full.bg-brand-input.border.border-slate-600.rounded-lg.px-4.py-2.text-white.placeholder-slate-500.focus-ring(
+                type="text" 
+                name="endpoint" 
+                value="engage.cloudflareclient.com:2408"
+                disabled
+                onkeyup="checkCustomDomain()"
+                class="focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent transition-all"
+              )
+              p.mt-1.text-xs.text-slate-500 Try '162.159.193.10:2408' if ISP blocks the domain.
+              
+              //- Warning Box
+              div#dnsWarning(style="display: none;").mt-3.bg-amber-900.bg-opacity-30.border.border-amber-700.rounded-lg.p-3
+                p.text-amber-200.text-xs
+                  strong.font-bold Warning: 
+                  | If using a custom domain, ensure DNS is set to 
+                  span.underline DNS Only (Grey Cloud)
+                  | . Orange Cloud will block WireGuard.
+
+            //- DNS
+            div.mb-5
+              label.block.text-sm.font-medium.text-slate-300.mb-2 DNS Servers
+              input.advanced-input.w-full.bg-brand-input.border.border-slate-600.rounded-lg.px-4.py-2.text-white.focus-ring(
+                type="text" 
+                name="dns" 
+                value="1.1.1.1, 2606:4700:4700::1111"
+                disabled
+                class="focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent"
+              )
+
+            //- Allowed IPs
+            div.mb-5
+              label.block.text-sm.font-medium.text-slate-300.mb-2 Allowed IPs (Split Tunnel)
+              input.advanced-input.w-full.bg-brand-input.border.border-slate-600.rounded-lg.px-4.py-2.text-white.focus-ring(
+                type="text" 
+                name="allowedips" 
+                value="0.0.0.0/0, ::/0"
+                disabled
+                class="focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent"
+              )
+
+            div.grid.grid-cols-2.gap-4
+              //- MTU
+              div
+                label.block.text-sm.font-medium.text-slate-300.mb-2 MTU
+                input.advanced-input.w-full.bg-brand-input.border.border-slate-600.rounded-lg.px-4.py-2.text-white.focus-ring(
+                  type="number" 
+                  name="mtu" 
+                  value="1280" 
+                  disabled
+                  class="focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent"
+                )
+              
+              //- KeepAlive
+              div
+                label.block.text-sm.font-medium.text-slate-300.mb-2 KeepAlive
+                input.advanced-input.w-full.bg-brand-input.border.border-slate-600.rounded-lg.px-4.py-2.text-white.focus-ring(
+                  type="number" 
+                  name="keepalive" 
+                  value="25" 
+                  disabled
+                  class="focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent"
+                )
+
+          //- SUBMIT BUTTON
+          button.w-full.bg-gradient-to-r.from-blue-600.to-blue-700.text-white.font-bold.py-3.px-4.rounded-xl.shadow-lg.transform.transition-all(
+            type="submit"
+            class="hover:from-blue-500 hover:to-blue-600 hover:scale-[1.02] focus:ring-4 focus:ring-blue-500/50 mt-6"
+          ) Generate Config
+
+      //- FOOTER
+      footer.mt-8.text-center
+        p.text-slate-500.text-sm
+          | Dev by 
+          a.text-brand-orange.font-semibold.transition-colors(href="https://afandiazmi.com" target="_blank" class="hover:text-orange-300") afandiazmi.com
+
+    //- CLIENT SCRIPTS
+    script.
+      function toggleMode() {
+        const isManual = document.getElementById('modeManual').checked;
+        const advancedSection = document.getElementById('advancedSection');
+        const inputs = document.querySelectorAll('.advanced-input');
+
+        if (isManual) {
+          advancedSection.style.display = 'block';
+          // Small animation effect
+          advancedSection.style.opacity = '0';
+          setTimeout(() => advancedSection.style.opacity = '1', 10);
+          inputs.forEach(input => input.removeAttribute('disabled'));
+        } else {
+          advancedSection.style.display = 'none';
+          inputs.forEach(input => input.setAttribute('disabled', 'true'));
+        }
+      }
+
+      function checkCustomDomain() {
+        const val = document.getElementById('endpointInput').value;
+        const warning = document.getElementById('dnsWarning');
+        
+        // If value is NOT the default AND NOT an IP address
+        if (val && !val.includes('cloudflareclient.com') && !val.match(/^[\d\.:]+$/)) {
+           warning.style.display = 'block';
+        } else {
+           warning.style.display = 'none';
+        }
+      }
